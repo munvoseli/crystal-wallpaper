@@ -10,9 +10,11 @@ trap exit_script SIGINT SIGTERM
 
 while [ $do_loop -gt 0 ]
 do
-    ./a.out
-    feh --bg-tile bg.ppm
-    sleep 1
+    ./crystal
+    feh --bg-scale bg.ppm
+    # if you have imlib2, this gets rid of the blending
+    # ./render
+    sleep .1
 done
 
 echo ""
