@@ -57,10 +57,9 @@ void change_pixel( int w, int h, char** p_pixels )
 	int yo = rand() % 3 + y;
 	x += 1;
 	y += 1;
-	char offset = rand() & 3;
-	(*p_pixels)[3 * (x + y * w) + 0] = (*p_pixels)[3 * (xo + yo * w) + 0] + offset;
-	(*p_pixels)[3 * (x + y * w) + 1] = (*p_pixels)[3 * (xo + yo * w) + 1] + offset;
-	(*p_pixels)[3 * (x + y * w) + 2] = (*p_pixels)[3 * (xo + yo * w) + 2] + offset;
+	(*p_pixels)[3 * (x + y * w) + 0] = (*p_pixels)[3 * (xo + yo * w) + 0] + rand() % 3;
+	(*p_pixels)[3 * (x + y * w) + 1] = (*p_pixels)[3 * (xo + yo * w) + 1] + rand() % 3;
+	(*p_pixels)[3 * (x + y * w) + 2] = (*p_pixels)[3 * (xo + yo * w) + 2] + rand() % 3;
 }
 
 int main(void)
@@ -74,8 +73,8 @@ int main(void)
 	fp = fopen( "bg.ppm", "r" );
 	if( fp == NULL )
 	{
-		width = 1920;
-		height = 1080;
+		width = 192;
+		height = 108;
 		pixels = get_rand_data( width, height );
 	}
 	else
@@ -84,7 +83,7 @@ int main(void)
 		fclose( fp );
 	}
 	int i;
-	for( i = 0; i < 100000; ++i )
+	for( i = 0; i < (width * height) >> 3; ++i )
 		change_pixel( width, height, &pixels );
 	for( i = 0; i < width * height * 3; ++i )
 		pixels[i] += 1;
