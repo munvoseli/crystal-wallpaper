@@ -61,19 +61,21 @@ void change_pixel( int w, int h, char** p_pixels )
 	int yo = rand() % 3 + y;
 	x += 1;
 	y += 1;
-	int sum = (*p_pixels)[3 * (x + y * w) + 0] + (*p_pixels)[3 * (x + y * w) + 1] + (*p_pixels)[3 * (x + y * w) + 2];
-	if (sum < 192)
-	{
-		(*p_pixels)[3 * (x + y * w) + 0] = (*p_pixels)[3 * (xo + yo * w) + 0] + rand() % 4 - 0;
-		(*p_pixels)[3 * (x + y * w) + 1] = (*p_pixels)[3 * (xo + yo * w) + 1] + rand() % 4 - 0;
-		(*p_pixels)[3 * (x + y * w) + 2] = (*p_pixels)[3 * (xo + yo * w) + 2] + rand() % 4 - 0;
-	}
-	else
-	{
-		(*p_pixels)[3 * (x + y * w) + 0] = (*p_pixels)[3 * (xo + yo * w) + 0] + rand() % 4 - 3;
-		(*p_pixels)[3 * (x + y * w) + 1] = (*p_pixels)[3 * (xo + yo * w) + 1] + rand() % 4 - 3;
-		(*p_pixels)[3 * (x + y * w) + 2] = (*p_pixels)[3 * (xo + yo * w) + 2] + rand() % 4 - 3;
-	}
+	int r = (unsigned char) (*p_pixels)[3 * (xo + yo * w) + 0];
+	int g = (unsigned char) (*p_pixels)[3 * (xo + yo * w) + 1];
+	int b = (unsigned char) (*p_pixels)[3 * (xo + yo * w) + 2];
+	int rr = rand() & 3;
+	int rg = rand() & 3;
+	int rb = rand() & 3;
+	int sum = r + g + b;
+	int o = -2; // -2 -1 0 1
+	if( r < 2 || g < 2 || b < 2 || r > 253 || g > 253 || b > 253 )
+		return;
+	if( sum < 192 )
+		o = -1; // -1 0 1 2
+	(*p_pixels)[3 * (x + y * w) + 0] = r + rr + o;
+	(*p_pixels)[3 * (x + y * w) + 1] = g + rg + o;
+	(*p_pixels)[3 * (x + y * w) + 2] = b + rb + o;
 }
 
 
@@ -130,33 +132,34 @@ int main(void)
 			pixels = load_image_from_ppm( fp, &width, &height );
 			fclose( fp );
 		}
-		for( i = 0; i < (width * height) >> 3; ++i )
+		for( i = 0; i < (width * height) >> 4; ++i )
 			change_pixel( width, height, &pixels );
 		write_file( width, height, pixels );
+		printf("%d  ", pixels[0] + pixels[1] + pixels[2]);
 		free( pixels );
 		printf("%d  ", j);
 		//render( 1920, 1080, "hi", disp, win, depth );
 
 		//XFlush( disp );
 		pm_drawable = XCreatePixmap( disp, win, 1920, 1080, depth );
-		imlib_context_set_drawable( win );
+		imlib_context_set_drawable( pm_drawable );
 		im = imlib_load_image_without_cache( "bg.ppm" );
 		imlib_context_set_image( im );
 		imlib_render_image_on_drawable_at_size( 0, 0, 1920, 1080 );
 
-		gcvalues.tile = pm_drawable;
-		gc = XCreateGC( disp, pm_drawable, 0, &gcvalues );
+		//gcvalues.tile = pm_drawable;
+		//gc = XCreateGC( disp, pm_drawable, 0, &gcvalues );
 		//XSetClipMask( disp, gc, pm_drawable );
 		//XFillRectangle( disp, pm_drawable, gc, 0, 0, 1920, 1080 );
 
-		//XSetWindowBackgroundPixmap( disp, win, pm_drawable );
+		XSetWindowBackgroundPixmap( disp, win, pm_drawable );
 		//XCopyArea( disp, pm_drawable, win, gc, 0, 0, 1920, 1080, 0, 0 );
-		//XClearWindow( disp, win );
+		XClearWindow( disp, win );
 		XFlush( disp );
-		XFreeGC( disp, gc );
+		//XFreeGC( disp, gc );
 		XFreePixmap( disp, pm_drawable );
 
-		usleep( 50000 );
+		usleep( 500000 );
 		printf("%d\n", j);
 		++j;
 	}
